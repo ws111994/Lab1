@@ -1,36 +1,65 @@
 const promptString = 'Enter your note here...';
 const lastSavedString = 'Last saved: ';
+const notesContainer = document.getElementById('notesContainer');
+let notes = JSON.parse(localStorage.getItem('notes')) || [];
 function addNote() {
-    const notesContainer = document.getElementById('notesContainer');
-    const textarea = document.createElement('textarea');
-    textarea.placeholder = promptString;
     
-    const removeButton = document.createElement('button');
-    removeButton.textContent = 'Remove';
-    removeButton.className = 'remove-button';
-    
-    removeButton.addEventListener('click', function() {
-        notesContainer.removeChild(textarea);
-        notesContainer.removeChild(removeButton);
+    // saveNotes();
+    let newNote = new Note(null);
+    //notes.push(newNote)
+    newNote.addToDOM(notesContainer);
+    newNote.addToNotes(notes);
+    console.log(notes);
+}
+
+function Note(text, optionalId) {
+    this.text = text;
+    this.generateUniqueID = function() {
+        // Retrieve the last assigned ID from local storage or initialize it
+        let lastID = parseInt(localStorage.getItem('lastID')) || 0;
+        
+        // Increment the ID for the new object
+        lastID++;
+        
+        // Store the updated ID in local storage
+        localStorage.setItem('lastID', lastID.toString());
+        
+        return lastID;
+    };
+    this.id = optionalId || this.generateUniqueID();
+    this.textarea = document.createElement('textarea');
+    this.textarea.value = text;
+    this.textarea.addEventListener('input', ()=> {
+        notes = notes.filter(obj => obj.id !== this.id);
+        this.text = this.textarea.value;
+        notes.push(this);
+        saveNotes();
+        console.log("text property changed to: " + this.text);
+    })
+    this.removeButton = document.createElement('button');
+    this.removeButton.textContent = 'Remove';
+    this.removeButton.className = 'remove-button';
+    this.removeButton.addEventListener('click', ()=> {
+        notesContainer.removeChild(this.textarea);
+        notesContainer.removeChild(this.removeButton);
+        notes = notes.filter(obj => obj.id !== this.id);
         saveNotes();
     });
-    
-    notesContainer.appendChild(textarea);
-    notesContainer.appendChild(removeButton);
-    saveNotes();
+    this.addToDOM = function(container) {
+        container.appendChild(this.textarea);
+        container.appendChild(this.removeButton);
+        console.log("adding to DOM");
+    };
+    this.addToNotes = function(localNotes) {
+        localNotes.push(this);
+    };
 }
 
 function saveNotes() {
-    const notes = [];
-    const textareas = document.querySelectorAll('textarea');
-    
-    textareas.forEach(textarea => {
-        notes.push(textarea.value);
-    });
-    
     localStorage.setItem('notes', JSON.stringify(notes));
     const lastSaved = new Date().toLocaleTimeString();
     document.getElementById('lastSaved').textContent = lastSavedString + lastSaved;
+   
 }
 
 function goToIndex() {
@@ -39,28 +68,15 @@ function goToIndex() {
 
 // Load existing notes on page load
 window.onload = function() {
+    //localStorage.clear();
     const notesContainer = document.getElementById('notesContainer');
-    const savedNotes = JSON.parse(localStorage.getItem('notes')) || [];
-    
-    savedNotes.forEach(note => {
-        const textarea = document.createElement('textarea');
-        textarea.value = note;
-        
-        const removeButton = document.createElement('button');
-        removeButton.textContent = 'Remove';
-        removeButton.className = 'remove-button';
-        
-        removeButton.addEventListener('click', function() {
-            notesContainer.removeChild(textarea);
-            notesContainer.removeChild(removeButton);
-            saveNotes();
-        });
-        
-        notesContainer.appendChild(textarea);
-        notesContainer.appendChild(removeButton);
+    notes = JSON.parse(localStorage.getItem('notes')) || [];
+    notes.forEach(note => {
+        console.log(note);
+        let newNote = new Note(note.text, note.id);
+        newNote.addToDOM(notesContainer);
     });
-    
-    saveNotes();
+
     
     // Periodically save notes every 2 seconds
     setInterval(saveNotes, 2000);

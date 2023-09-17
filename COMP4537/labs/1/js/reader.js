@@ -10,7 +10,8 @@ function retrieveNotes() {
 
     savedNotes.forEach(note => {
         const div = document.createElement('div');
-        div.textContent = note;
+        div.className = "reader";
+        div.textContent = note.text;
         notesContainer.appendChild(div);
     });
 
