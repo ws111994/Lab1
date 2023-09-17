@@ -52,16 +52,12 @@ function Note(text, optionalId) {
     this.addToNotes = function(localNotes) {
         localNotes.push(this);
     };
-    this.addOnlyText = function(container) {
-        container.appendChild(this.textarea);
-    }
 }
 
 function saveNotes() {
     localStorage.setItem('notes', JSON.stringify(notes));
     const lastSaved = new Date().toLocaleTimeString();
     document.getElementById('lastSaved').textContent = lastSavedString + lastSaved;
-   
 }
 
 function goToIndex() {
