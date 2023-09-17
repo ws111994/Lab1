@@ -1,4 +1,3 @@
-const promptString = 'Enter your note here...';
 const lastSavedString = 'Last saved: ';
 const notesContainer = document.getElementById('notesContainer');
 let notes = JSON.parse(localStorage.getItem('notes')) || [];
@@ -53,6 +52,9 @@ function Note(text, optionalId) {
     this.addToNotes = function(localNotes) {
         localNotes.push(this);
     };
+    this.addOnlyText = function(container) {
+        container.appendChild(this.textarea);
+    }
 }
 
 function saveNotes() {
